@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: multivendor-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set these manually in the Render dashboard:
+      # DATABASE_URL            — Neon pooled connection string
+      # DIRECT_URL              — Neon direct connection string
+      # JWT_SECRET              — openssl rand -base64 32
+      # JWT_REFRESH_SECRET      — openssl rand -base64 32
+      # FRONTEND_URL            — your Vercel app URL (e.g. https://your-app.vercel.app)
+      # CLOUDINARY_CLOUD_NAME
+      # CLOUDINARY_API_KEY
+      # CLOUDINARY_API_SECRET
+      # STRIPE_SECRET_KEY       — sk_test_...
+      # STRIPE_WEBHOOK_SECRET   — whsec_... (from Stripe dashboard webhook)
+      # BREVO_SMTP_HOST         — smtp-relay.brevo.com
+      # BREVO_SMTP_PORT         — 587
+      # BREVO_SMTP_USER         — your Brevo login email
+      # BREVO_SMTP_PASS         — your Brevo SMTP API key
+      # EMAIL_FROM              — noreply@yourdomain.com
+      # EMAIL_FROM_NAME         — MultiVendor Shop
