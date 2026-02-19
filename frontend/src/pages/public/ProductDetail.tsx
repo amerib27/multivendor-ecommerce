@@ -135,7 +135,7 @@ export default function ProductDetail() {
           </AnimatePresence>
           {displayImages.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {displayImages.map((img, i) => (
+              {displayImages.map((img: { id: string; url: string }, i: number) => (
                 <button
                   key={img.id}
                   onClick={() => setSelectedImage(i)}

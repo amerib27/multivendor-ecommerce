@@ -10,7 +10,7 @@ import { formatCurrency } from '../../utils/format'
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder')
 
-function PaymentForm({ orderId, clientSecret }: { orderId: string; clientSecret: string }) {
+function PaymentForm({ orderId, clientSecret: _clientSecret }: { orderId: string; clientSecret: string }) {
   const stripe = useStripe()
   const elements = useElements()
   const navigate = useNavigate()
@@ -55,7 +55,7 @@ export default function Checkout() {
   const [step, setStep] = useState<'address' | 'payment'>('address')
   const [orderId, setOrderId] = useState<string>('')
   const [clientSecret, setClientSecret] = useState<string>('')
-  const { items, itemCount, total } = useCartStore()
+  const { items, total } = useCartStore()
   const { toast } = useUIStore()
 
   const { data: addresses } = useQuery({

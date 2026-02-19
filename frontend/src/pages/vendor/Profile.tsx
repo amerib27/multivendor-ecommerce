@@ -5,7 +5,7 @@ import { useAuthStore } from '../../store/auth.store'
 import { useUIStore } from '../../store/ui.store'
 
 export default function VendorProfile() {
-  const { user, setUser } = useAuthStore()
+  const { user } = useAuthStore()
   const { toast } = useUIStore()
   const queryClient = useQueryClient()
 
@@ -26,7 +26,7 @@ export default function VendorProfile() {
 
   const update = useMutation({
     mutationFn: () => api.put('/vendors/dashboard/profile', form),
-    onSuccess: (res) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vendor-profile'] })
       toast('Store profile updated!', 'success')
     },

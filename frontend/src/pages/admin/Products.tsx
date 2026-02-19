@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../../services/api'
-import { useUIStore } from '../../store/ui.store'
 import { formatCurrency } from '../../utils/format'
 import { TableRowSkeleton } from '../../components/ui/Skeleton'
 
 export default function AdminProducts() {
   const [search, setSearch] = useState('')
-  const { toast } = useUIStore()
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({

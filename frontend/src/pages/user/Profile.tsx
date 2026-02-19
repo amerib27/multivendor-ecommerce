@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import api from '../../services/api'
 import { useAuthStore } from '../../store/auth.store'
 import { useUIStore } from '../../store/ui.store'
@@ -7,7 +7,6 @@ import { useUIStore } from '../../store/ui.store'
 export default function Profile() {
   const { user, setUser } = useAuthStore()
   const { toast } = useUIStore()
-  const queryClient = useQueryClient()
 
   const [form, setForm] = useState({ firstName: user?.firstName || '', lastName: user?.lastName || '' })
   const [passwords, setPasswords] = useState({ current: '', newPass: '', confirm: '' })

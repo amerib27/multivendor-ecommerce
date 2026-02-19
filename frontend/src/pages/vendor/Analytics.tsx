@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, Legend
+  BarChart, Bar
 } from 'recharts'
 import api from '../../services/api'
 import { formatCurrency } from '../../utils/format'
