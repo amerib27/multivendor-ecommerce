@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
@@ -22,10 +22,9 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-700',
 }
 
-function PaymentForm({ orderId }: { orderId: string }) {
+function PaymentForm() {
   const stripe = useStripe()
   const elements = useElements()
-  const navigate = useNavigate()
   const { clearCart } = useCartStore()
   const { toast } = useUIStore()
   const [paying, setPaying] = useState(false)
@@ -186,7 +185,7 @@ export default function OrderDetail() {
         <div className="bg-white border border-[#EEEEEE] rounded-xl p-6 mb-6">
           <h2 className="font-semibold text-[#333333] mb-4">Complete Your Payment</h2>
           <Elements stripe={stripePromise} options={{ clientSecret }}>
-            <PaymentForm orderId={id!} />
+            <PaymentForm />
           </Elements>
         </div>
       )}
