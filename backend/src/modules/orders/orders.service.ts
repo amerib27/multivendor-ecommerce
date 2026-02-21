@@ -186,7 +186,12 @@ export class OrdersService {
   // ─── Vendor order management ─────────────────────────────────────────────────
 
   async getVendorOrders(vendorId: string, page: number, limit: number, status?: string) {
-    const where: { vendorId: string; status?: OrderStatus } = { vendorId }
+    // Only show orders that have been paid (Order status = CONFIRMED)
+    const where: any = {
+      vendorId,
+      order: { status: OrderStatus.CONFIRMED }
+    }
+    // Optionally filter by OrderItem status (PENDING, PROCESSING, SHIPPED, etc.)
     if (status) where.status = status as OrderStatus
 
     const [total, items] = await Promise.all([
