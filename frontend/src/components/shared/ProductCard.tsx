@@ -43,7 +43,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     ? calcDiscount(product.price, product.comparePrice)
     : null
 
-  const primaryImage = product.images.find(img => true) // First image
+  const primaryImage = product.images[0] // First image
   const imageUrl = primaryImage?.url || '/placeholder-product.jpg'
 
   const handleAddToCart = (e: React.MouseEvent) => {
