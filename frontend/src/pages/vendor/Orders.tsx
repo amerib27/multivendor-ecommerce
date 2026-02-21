@@ -46,6 +46,7 @@ export default function VendorOrders() {
     mutationFn: ({ itemId, status }: { itemId: string; status: string }) =>
       api.patch(`/orders/vendor/items/${itemId}/status`, { status }),
     onSuccess: () => {
+      setStatusFilter('All') // Reset to "All" so updated order remains visible
       queryClient.invalidateQueries({ queryKey: ['vendor-orders'] })
       queryClient.invalidateQueries({ queryKey: ['vendor-stats'] })
       toast('Order status updated', 'success')
