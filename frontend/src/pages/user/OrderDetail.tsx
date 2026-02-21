@@ -1,8 +1,15 @@
-import { useParams, Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import api from '../../services/api'
 import { formatCurrency, formatDate } from '../../utils/format'
 import { Skeleton } from '../../components/ui/Skeleton'
+import { useState } from 'react'
+import { useUIStore } from '../../store/ui.store'
+import { useCartStore } from '../../store/cart.store'
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder')
 
 const STEPS = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED']
 
@@ -15,8 +22,51 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-100 text-red-700',
 }
 
+function PaymentForm({ orderId }: { orderId: string }) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const navigate = useNavigate()
+  const { clearCart } = useCartStore()
+  const { toast } = useUIStore()
+  const [paying, setPaying] = useState(false)
+
+  const handlePay = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!stripe || !elements) return
+    setPaying(true)
+    const { error } = await stripe.confirmPayment({
+      elements,
+      redirect: 'if_required',
+    })
+    if (error) {
+      toast(error.message || 'Payment failed', 'error')
+      setPaying(false)
+    } else {
+      clearCart()
+      toast('Payment successful! Order confirmed.', 'success')
+      window.location.reload() // Refresh to show updated order status
+    }
+  }
+
+  return (
+    <form onSubmit={handlePay} className="space-y-4">
+      <PaymentElement />
+      <button
+        type="submit"
+        disabled={!stripe || paying}
+        className="w-full bg-[#0088DD] text-white py-3 rounded-xl font-semibold hover:bg-[#0077C2] disabled:opacity-60 transition-colors"
+      >
+        {paying ? 'Processing Payment...' : 'Complete Payment'}
+      </button>
+    </form>
+  )
+}
+
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>()
+  const [showPayment, setShowPayment] = useState(false)
+  const [clientSecret, setClientSecret] = useState<string>('')
+  const { toast } = useUIStore()
 
   const { data: order, isLoading } = useQuery({
     queryKey: ['order', id],
@@ -25,6 +75,20 @@ export default function OrderDetail() {
       return res.data.data
     },
     enabled: !!id,
+  })
+
+  const createPaymentIntent = useMutation({
+    mutationFn: async () => {
+      const res = await api.post('/payments/create-intent', { orderId: id })
+      return res.data.data
+    },
+    onSuccess: (data) => {
+      setClientSecret(data.clientSecret)
+      setShowPayment(true)
+    },
+    onError: (err: any) => {
+      toast(err.response?.data?.message || 'Failed to initiate payment', 'error')
+    },
   })
 
   if (isLoading) {
@@ -40,6 +104,7 @@ export default function OrderDetail() {
   if (!order) return null
 
   const isCancelled = order.status === 'CANCELLED'
+  const isPending = order.status === 'PENDING' && (!order.payment || order.payment.status !== 'PAID')
   const currentStep = isCancelled ? -1 : STEPS.indexOf(order.status)
 
   return (
@@ -103,9 +168,28 @@ export default function OrderDetail() {
               <span className="text-gray-500">Date</span>
               <span className="text-[#333333]">{formatDate(order.createdAt)}</span>
             </div>
+            {isPending && !showPayment && (
+              <button
+                onClick={() => createPaymentIntent.mutate()}
+                disabled={createPaymentIntent.isPending}
+                className="w-full mt-3 bg-[#FF4D4D] text-white py-2 rounded-lg font-semibold hover:bg-[#E63939] disabled:opacity-60 transition-colors"
+              >
+                {createPaymentIntent.isPending ? 'Loading...' : 'Complete Payment'}
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Payment Form (for pending orders) */}
+      {showPayment && clientSecret && (
+        <div className="bg-white border border-[#EEEEEE] rounded-xl p-6 mb-6">
+          <h2 className="font-semibold text-[#333333] mb-4">Complete Your Payment</h2>
+          <Elements stripe={stripePromise} options={{ clientSecret }}>
+            <PaymentForm orderId={id!} />
+          </Elements>
+        </div>
+      )}
 
       {/* Items */}
       <div className="bg-white border border-[#EEEEEE] rounded-xl p-4">

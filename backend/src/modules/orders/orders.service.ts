@@ -89,16 +89,8 @@ export class OrdersService {
         },
       })
 
-      // 7. Decrement stock + increment soldCount
-      for (const item of items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: { decrement: item.quantity },
-            soldCount: { increment: item.quantity },
-          },
-        })
-      }
+      // 7. DO NOT decrement stock yet - wait for payment confirmation via webhook
+      // Stock will be decremented when payment succeeds (see payments.service.ts webhook handler)
 
       // 8. Create notification
       await tx.notification.create({
@@ -164,17 +156,20 @@ export class OrdersService {
     }
 
     return prisma.$transaction(async (tx) => {
-      // Restore stock
-      const items = await tx.orderItem.findMany({ where: { orderId } })
-      for (const item of items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: { increment: item.quantity },
-            soldCount: { decrement: item.quantity },
-          },
-        })
+      // Only restore stock if order was CONFIRMED (payment succeeded and stock was decremented)
+      if (order.status === 'CONFIRMED') {
+        const items = await tx.orderItem.findMany({ where: { orderId } })
+        for (const item of items) {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: { increment: item.quantity },
+              soldCount: { decrement: item.quantity },
+            },
+          })
+        }
       }
+      // If PENDING, stock was never decremented, so nothing to restore
 
       return tx.order.update({
         where: { id: orderId },
@@ -186,12 +181,16 @@ export class OrdersService {
   // ─── Vendor order management ─────────────────────────────────────────────────
 
   async getVendorOrders(vendorId: string, page: number, limit: number, status?: string) {
-    // Only show orders that have been paid (Order status = CONFIRMED)
+    // Only show orders that have been paid (exclude PENDING and CANCELLED)
     const where: any = {
       vendorId,
-      order: { status: OrderStatus.CONFIRMED }
+      order: {
+        status: {
+          notIn: [OrderStatus.PENDING, OrderStatus.CANCELLED]
+        }
+      }
     }
-    // Optionally filter by OrderItem status (PENDING, PROCESSING, SHIPPED, etc.)
+    // Optionally filter by OrderItem status (CONFIRMED, PROCESSING, SHIPPED, DELIVERED)
     if (status) where.status = status as OrderStatus
 
     const [total, items] = await Promise.all([

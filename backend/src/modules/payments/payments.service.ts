@@ -72,6 +72,21 @@ export class PaymentsService {
             data: { status: 'CONFIRMED' },
           })
 
+          // Decrement stock and increment soldCount (only happens after payment succeeds)
+          const orderItems = await tx.orderItem.findMany({
+            where: { orderId: payment.orderId },
+            select: { productId: true, quantity: true, vendorId: true, vendorPayout: true }
+          })
+          for (const item of orderItems) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: {
+                stock: { decrement: item.quantity },
+                soldCount: { increment: item.quantity },
+              },
+            })
+          }
+
           // Update vendor stats
           const orderItems = await tx.orderItem.findMany({ where: { orderId: payment.orderId } })
           for (const item of orderItems) {
