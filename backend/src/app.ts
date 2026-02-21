@@ -23,6 +23,9 @@ import adminRouter from './modules/admin/admin.router'
 
 const app = express()
 
+// ─── Trust Proxy (for Render/Heroku/etc) ─────────────────────────────────────
+app.set('trust proxy', 1)
+
 // ─── Security Headers ────────────────────────────────────────────────────────
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
