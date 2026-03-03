@@ -8,7 +8,7 @@ import { useUIStore } from '../../store/ui.store'
 export default function Profile() {
   const { user, setUser } = useAuthStore()
   const { toast } = useUIStore()
-  // Force redeploy
+  // Force bundle rebuild - v2
 
   const [form, setForm] = useState({ firstName: user?.firstName || '', lastName: user?.lastName || '' })
   const [passwords, setPasswords] = useState({ current: '', newPass: '', confirm: '' })
