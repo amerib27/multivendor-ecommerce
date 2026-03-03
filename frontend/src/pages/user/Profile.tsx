@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useMutation } from '@tantml:react-query'
+import { useMutation } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import api from '../../services/api'
 import { useAuthStore } from '../../store/auth.store'
