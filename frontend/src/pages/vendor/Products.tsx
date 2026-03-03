@@ -120,20 +120,23 @@ export default function VendorProducts() {
                     </button>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                       <Link
                         to={`/vendor/products/${product.id}/edit`}
-                        className="text-xs text-[#0088DD] hover:underline"
+                        className="px-3 py-1.5 text-xs font-medium text-white bg-[#0088DD] hover:bg-[#0077C2] rounded-md transition-colors"
                       >
                         Edit
                       </Link>
                       <button
                         onClick={() => {
-                          if (confirm('Delete this product?')) deleteProduct.mutate(product.id)
+                          if (window.confirm(`Delete "${product.name}"? This cannot be undone.`)) {
+                            deleteProduct.mutate(product.id)
+                          }
                         }}
-                        className="text-xs text-[#FF4D4D] hover:underline"
+                        disabled={deleteProduct.isPending}
+                        className="px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                       >
-                        Delete
+                        {deleteProduct.isPending ? 'Deleting...' : 'Delete'}
                       </button>
                     </div>
                   </td>

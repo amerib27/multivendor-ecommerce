@@ -81,3 +81,19 @@ export const setDefaultAddress = async (req: AuthRequest, res: Response, next: N
     else next(err)
   }
 }
+
+export const deleteAccount = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { password } = req.body
+    if (!password) {
+      sendError(res, 'Password is required', 400)
+      return
+    }
+
+    const data = await usersService.deleteAccount(req.user!.userId, password)
+    sendSuccess(res, data, 'Account deleted successfully')
+  } catch (err) {
+    if (err instanceof Error) sendError(res, err.message, 400)
+    else next(err)
+  }
+}

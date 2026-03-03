@@ -2,6 +2,7 @@ import { Router } from 'express'
 import {
   getProfile, updateProfile, updateAvatar, changePassword,
   getAddresses, createAddress, updateAddress, deleteAddress, setDefaultAddress,
+  deleteAccount,
 } from './users.controller'
 import { authenticate } from '../../middleware/auth.middleware'
 import { validate } from '../../middleware/validate.middleware'
@@ -24,5 +25,8 @@ router.post('/addresses', validate(createAddressSchema), createAddress)
 router.put('/addresses/:id', updateAddress)
 router.delete('/addresses/:id', deleteAddress)
 router.patch('/addresses/:id/default', setDefaultAddress)
+
+// Account deletion
+router.delete('/account', deleteAccount)
 
 export default router

@@ -30,6 +30,7 @@ const UserAddresses = lazy(() => import('./pages/user/Addresses'))
 const UserWishlist = lazy(() => import('./pages/user/Wishlist'))
 const UserCart = lazy(() => import('./pages/user/Cart'))
 const Checkout = lazy(() => import('./pages/user/Checkout'))
+const DeleteAccount = lazy(() => import('./pages/user/DeleteAccount'))
 
 const VendorApply = lazy(() => import('./pages/vendor/Apply'))
 const VendorDashboard = lazy(() => import('./pages/vendor/Dashboard'))
@@ -105,6 +106,7 @@ function App() {
                 <Route path="/addresses" element={<UserAddresses />} />
                 <Route path="/wishlist" element={<UserWishlist />} />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route path="/delete-account" element={<DeleteAccount />} />
               </Route>
             </Route>
 
